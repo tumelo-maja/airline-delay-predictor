@@ -1,70 +1,147 @@
-# ![CI logo](https://codeinstitute.s3.amazonaws.com/fullstack/ci_logo_small.png)
-
-## Template Instructions
-
-Welcome,
-
-This is the Code Institute student template for the bring your own data project option in Predictive Analytics. We have preinstalled all of the tools you need to get started. It's perfectly okay to use this template as the basis for your project submissions. Click the `Use this template` button above to get started.
-
-You can safely delete the Template Instructions section of this README.md file and modify the remaining paragraphs for your own project. Please do read the Template Instructions at least once, though! It contains some important information about the IDE and the extensions we use.
-
-## How to use this repo
-
-1. Use this template to create your GitHub project repo
-
-1. In your newly created repo click on the green Code button. 
-
-1. Then, from the Codespaces tab, click Create codespace on main.
-
-1. Wait for the workspace to open. This can take a few minutes.
-
-1. Open a new terminal and `pip3 install -r requirements.txt`
-
-1. Open the jupyter_notebooks directory, and click on the notebook you want to open.
-
-1. Click the kernel button and choose Python Environments.
-
-Note that the kernel says Python 3.12.1 as it inherits from the workspace, so it will be Python-3.12.1 as installed by Codespaces. To confirm this, you can use `! python --version` in a notebook code cell.
-
-## Cloud IDE Reminders
-
-To log into the Heroku toolbelt CLI:
-
-1. Log in to your Heroku account and go to _Account Settings_ in the menu under your avatar.
-2. Scroll down to the _API Key_ and click _Reveal_
-3. Copy the key
-4. In the terminal, run `heroku_config`
-5. Paste in your API key when asked
-
-
-You can now use the `heroku` CLI program - try running `heroku apps` to confirm it works. This API key is unique and private to you so do not share it. If you accidentally make it public then you can create a new one with _Regenerate API Key_.
-
+# Flight Delay Predictor
 
 ## Dataset Content
-* Describe your dataset. Choose a dataset of reasonable size to avoid exceeding the repository's maximum size and to have a shorter model training time. If you are doing an image recognition project, we suggest you consider using an image shape that is 100px × 100px or 50px × 50px, to ensure the model meets the performance requirement but is smaller than 100Mb for a smoother push to GitHub. A reasonably sized image set is ~5000 images, but you can choose ~10000 lines for numeric or textual data. 
 
+The TranStats Airline On-Time Performance dataset records information about flights in the U.S., including delay causes and timing. Each record represents a monthly summary of flights for a given airport and airline. Count of flights delayed and delay duration are included in each record.
+
+## Project Goals
+
+* Discover hidden flight delay patterns and trends by airline-airport-month (AAM)
+* Predict if a given AAM combination will likely have above-average delays.
+* Estimate the expected delay duration for the given AAM combination.
+* Present results through an interactive dashboard.
 
 ## Business Requirements
-* Describe your business requirements
 
+### Business Requirement 1: Discover Delay Patterns
+
+**Objectives:**
+
+* Describe any seasonal or regional delay trends/patterns.
+* Identify airlines, airports or months most affected by flight delays.
+* Quantify, in proportions, the contributions of various delay factors/causes to the overall flight delays.
+
+**Benefit to user(s):**
+
+* Airports/Airlines can anticipate/plan for expected delays and allocate resources/personnel as applicable to the delay type.
+* Long term use, systemic issues requiring interventions can be identified if the flight delays are non-environmental.
+
+### Business Requirement 2: Predict Monthly Delay Risk
+
+**Objectives:**
+
+* Predict the likelihood that an airline-airport pair will experience flight delays for a given month. Likelihood to be presented as a probability.
+
+**Benefit to user(s):**
+
+* Enables capacity forecasting and planning by airline/airport operators.
+* Allows for performance evaluation between airlines and airport for different months.
+
+ML Task: Classification
+
+### Business Requirement 3: Predict Delay Duration
+
+**Objectives:**
+
+* Predict the average delay duration for AAM combination if likely to occur.
+
+**Benefit to user(s):**
+
+* Airlines/airports operators can estimated the service disruption levels.
+* Helps set passengers expectations and to effectively/accurately communicate expected delays.
+
+ML Task: Regression/Classification
 
 ## Hypothesis and how to validate?
-* List here your project hypothesis(es) and how you envision validating it (them) 
 
+The hypotheses listed below are aligned to individual business requirements (BR's).
+
+* **Hypothesis 1:** Flight delays have a pattern across seasons, airlines and airports, with higher delays during peak travel seasons/ winter months at major airports.
+  * Descriptive statistics / clustering - EDA and plots can be useful describing relationships between variables.
+  * Validation: timeseries plots, correlations r2 >= 0.8, silhoutte scores.
+
+* **Hypothesis 2:** Delays causes/factors differ across airports/airlines and seasons.
+  * Clustering analysis
+
+* **Hypothesis 3:** Flight delay risk and duration can be predicted from historical flight data.
+  * Delay risk: Regression/Classification
+  * Delay duration: Multiclass Classification - F1 => 0.7, confusion matrix
+  * Validation using Recall/precision, f1 etc.
 
 ## The rationale to map the business requirements to the Data Visualizations and ML tasks
-* List your business requirements and a rationale to map them to the Data Visualizations and ML tasks
 
+* **Business Requirement 1:** Discover Delay Patterns/Trends
+  * **Analysis:** Timeseries trends by airport/month, correlation plots, heatmaps of delay causes.
+  * **ML Task:** clustering (unsupervised) to group airports/airlines with similar delay patterns
+  * **Output:** Delay trends and cluster insights for airports/airlines.
+
+* **Business Requirement 2:** Predict Delay Risk
+  * **Analysis:** Feature exploration and importance plots
+  * **ML Task:** Binary classification (check if average delay exceeded - 2 classes, 0 - No, 1 - Yes)
+  * **Output:** Probability of high-delay risk per AAM combination.
+
+* **Business Requirement 3:** Predict Delay Duration
+  * **Analysis:** Delay distribution plots and confusion matrix
+  * **ML Task:** Multiclass classification (discretized delay durations classes)
+  * **Output:** Predicted delay duration class for a given AAM combination.
 
 ## ML Business Case
-* In the previous bullet, you potentially visualized an ML task to answer a business requirement. You should frame the business case using the method we covered in the course 
 
+---
+
+### Model 1: Delay Pattern Analysis - Clustering
+
+**Goal:** To group records with similar delays by airline and airport to identify patterns/trends. There is no target variable for unsupervised learning ML task.
+
+* **Data inputs:** Training data to fit the model will be a subset of the TranStats Airline On-Time Performance dataset.
+  * Train data - features: all variables.
+* **Output:** Airport/airline cluster label, defined as an additional column appended to the dataset. This column represents the cluster's suggestions of groups. It is a categorical and nominal variable represented by numbers starting at 0.
+* **Validation:** average silhouette score >= 0.45. The ML model would be considered a failure if the model suggests more than 15 clusters which would be difficult interpret.
+* **Heuristics:** Currently, there is no approach to grouping airports/airlines by delay characteristics.
+
+### Model 2: Predict Delay Risk - Binary Classification
+
+**Goal:** To predict whether a given AAM combination will experience a higher delay, more than the average delay for that AAM combination.
+
+* **Data inputs:** Training data to fit the model will be a subset of the TranStats Airline On-Time Performance dataset.
+  * Train data - features: all variables, target: delay.
+* **Output:** Delay risk label (Yes/No) with a probability score. The target variable is a categorical. Binary classification will used for analysis. Model types to be consider include Logistic Regression, Random Forest etc.
+* **Validation:** Recall >= 0.8, Precision >= 0.75.
+* **Heuristics:** Currently, there is no approach to predict if a delay is likely for a given AAM combination.
+
+### Model 3: Predict Delay Duration - Multiclass Classification
+
+**Goal:** To predict the expected delay duration for a given AAM combination.
+
+* **Data inputs:** Training data to fit the model will be a subset of the TranStats Airline On-Time Performance dataset.
+  * Train data - features: all variables, target: discretized classes of delay duration.
+* **Output:** Delay risk label (Yes/No) with a probability score. The target variable is a categorical. Binary classification will used for analysis. Model types to be consider include Logistic Regression, Random Forest etc.
+* **Validation:** F1 >= 0.75.
+* **Heuristics:** Currently, there is no approach to predict flight delay levels for a given AAM combination.
 
 ## Dashboard Design
-* List all dashboard pages and their content, either blocks of information or widgets, like buttons, checkboxes, images, or any other item that your dashboard library supports.
-* Later, during the project development, you may revisit your dashboard plan to update a given feature (for example, at the beginning of the project you were confident you would use a given plot to display an insight but subsequently you used another plot type).
 
+### Page 1: Quick Project Summary
 
+* Project summary
+* Dataset description
+* Business requirements
+
+### Page 2: Flight Delay Patterns/Trends
+
+* Plots and elements for Business Requirement 2.
+
+### Page 3: Predict Delay Risk
+
+* Plots and elements for Business Requirement 3.
+
+### Page 4: Predict Delay Risk
+
+* Plots and elements for Business Requirement 4.
+
+### Page 5: Predict Delay Risk
+
+* Plots and elements for Business Requirement 5.
 
 ## Unfixed Bugs
 * You will need to mention unfixed bugs and why they were not fixed. This section should include shortcomings of the frameworks or technologies used. Although time can be a significant variable to consider, paucity of time and difficulty understanding implementation is not a valid reason to leave bugs unfixed.
