@@ -61,7 +61,7 @@ The hypotheses listed below are aligned to individual business requirements (BR'
   * Validation: timeseries plots, correlations r2 >= 0.8, silhoutte scores.
 
 * **Hypothesis 2:** Delays causes/factors differ across airports/airlines and seasons.
-  * Clustering analysis
+  * Clustering analysis 
 
 * **Hypothesis 3:** Flight delay risk and duration can be predicted from historical flight data.
   * Delay risk: Regression/Classification
@@ -144,6 +144,8 @@ The hypotheses listed below are aligned to individual business requirements (BR'
 * Plots and elements for Business Requirement 5.
 
 ## Unfixed Bugs
+
+* ipython error - https://github.com/explosion/spacy/issues/13871. solution: `pip install ipython==7.23.1`
 * You will need to mention unfixed bugs and why they were not fixed. This section should include shortcomings of the frameworks or technologies used. Although time can be a significant variable to consider, paucity of time and difficulty understanding implementation is not a valid reason to leave bugs unfixed.
 
 ## Deployment
